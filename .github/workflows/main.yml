@@ -7,13 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync-to-hub:
+  train-model:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -22,7 +19,14 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
+          
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
