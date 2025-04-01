@@ -1,10 +1,6 @@
----
-title: {{title}}
-emoji: {{emoji}}
-colorFrom: {{colorFrom}}
-colorTo: {{colorTo}}
-sdk: {{sdk}}
-sdk_version: "{{sdkVersion}}"
-app_file: app.py
+title: MLOps Demo
+emoji: 👁
+colorFrom: gray
+colorTo: pink
+sdk: docker
 pinned: false
----
