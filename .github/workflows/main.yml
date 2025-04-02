@@ -7,20 +7,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  train-model:
+  install-dependencies:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
+  
+  register-dataset:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Upload Dataset to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python data_science/src/data_register.py
           
   sync-to-hub:
-    needs: train-model
+    needs: register-dataset
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
