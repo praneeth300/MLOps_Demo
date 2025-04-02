@@ -21,8 +21,7 @@ for col in categorical_cols:
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
 
 
-# Save train and test datasets
-train_df.to_csv("data", "train.csv"), index=False)
-test_df.to_csv("data", "test.csv"), index=False)
+train_df.to_csv("data/train.csv", index=False)
+test_df.to_csv("data/test.csv", index=False)
 
 
