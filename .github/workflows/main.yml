@@ -19,9 +19,19 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python data_science/src/data_register.py
-          
-  sync-to-hub:
+
+  data-prep:
     needs: register-dataset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Data Preparation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python data_science/src/prep.py 
+        
+  sync-to-hub:
+    needs: data-prep
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
