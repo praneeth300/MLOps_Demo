@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
 # Read dataset
-df = pd.read_csv("__")
+df = pd.read_csv("hf://datasets/praneeth232/test/teleco_churn.csv")
 
 # Handle missing values
 df.fillna(method='ffill', inplace=True)  # Forward fill missing values
