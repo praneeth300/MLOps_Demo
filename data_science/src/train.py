@@ -20,7 +20,7 @@ X_train = train_df.drop(columns=[target_col])
 y_test = test_df[target_col]
 X_test = test_df.drop(columns=[target_col])
 
-model = DecisionTreeClassifier(criterion=args.criterion, max_depth=args.max_depth)
+model = DecisionTreeClassifier(criterion="gini", max_depth=5)
 model.fit(X_train, y_train)
 
 
