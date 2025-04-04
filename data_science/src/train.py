@@ -2,8 +2,12 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
-train_df = pd.read_csv(Path(args.train_data)/"train.csv")
-test_df = pd.read_csv(Path(args.test_data)/"test.csv")
+
+train_path = "hf://datasets/praneeth232/test/train.csv"
+test_path = "hf://datasets/praneeth232/test/test.csv"
+
+train_df = pd.read_csv(train_path)
+test_df = pd.read_csv(test_path)
 
 target_col = 'Churn'  # Assuming 'Churn' is the target column
 
