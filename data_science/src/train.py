@@ -1,6 +1,10 @@
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+from huggingface_hub import HfApi
+import joblib
+
+api = HfApi()
 
 
 train_path = "hf://datasets/praneeth232/test/train.csv"
@@ -24,3 +28,12 @@ yhat_test = model.predict(X_test)
 accuracy = accuracy_score(y_test, yhat_test)
 print(f'Accuracy of Decision Tree classifier on test set: {accuracy:.2f}')
 
+joblib.dump(model,"churn_model.joblib")
+
+
+api.upload_file(
+    path_or_fileobj="churn_model.joblib",
+    path_in_repo="churn_model.joblib",
+    repo_id="praneeth232/test-model",
+    repo_type="model",
+)
