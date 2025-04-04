@@ -29,14 +29,17 @@ print("Dataset split into train and test sets.")
 train_df.to_csv("train.csv",index=False)
 test_df.to_csv("test.csv",index=False)
 
-api.upload_folder(
-    folder_path="train.csv",
+
+api.upload_file(
+    path_or_fileobj="test.csv",
+    path_in_repo="test.csv",
     repo_id="praneeth232/test",
     repo_type="dataset",
 )
 
-api.upload_folder(
-    folder_path="test.csv",
+api.upload_file(
+    path_or_fileobj="train.csv",
+    path_in_repo="train.csv",
     repo_id="praneeth232/test",
     repo_type="dataset",
 )
