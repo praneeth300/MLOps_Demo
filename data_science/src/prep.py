@@ -5,17 +5,10 @@ from sklearn.model_selection import train_test_split
 from huggingface_hub import HfApi
 
 # Define constants for the dataset and output paths
+api = HfApi(token=os.getenv("HF_TOKEN"))
 DATASET_PATH = "hf://datasets/praneeth232/test/teleco_churn.csv"
-TRAIN_OUTPUT_PATH = "data/train.csv"
-TEST_OUTPUT_PATH = "data/test.csv"
-
-# Read the dataset
-try:
-    df = pd.read_csv(DATASET_PATH)
-    print("Dataset loaded successfully.")
-except Exception as e:
-    print(f"Error loading the dataset: {e}")
-    raise  # Reraise exception to stop further execution
+df = pd.read_csv(DATASET_PATH)
+print("Dataset loaded successfully.")
 
 # Handle missing values
 df.fillna(method='ffill', inplace=True)  # Forward fill missing values
@@ -33,14 +26,17 @@ print(f"Encoded categorical columns: {list(categorical_cols)}")
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
 print("Dataset split into train and test sets.")
 
-# Ensure output directories exist
-os.makedirs(os.path.dirname(TRAIN_OUTPUT_PATH), exist_ok=True)
-os.makedirs(os.path.dirname(TEST_OUTPUT_PATH), exist_ok=True)
+train_df.to_csv("train.csv",index=False)
+test_df.to_csv("test.csv",index=False)
 
-# Save train and test datasets
-try:
-    train_df.to_csv(TRAIN_OUTPUT_PATH, index=False)
-    test_df.to_csv(TEST_OUTPUT_PATH, index=False)
-    print("Datasets saved successfully.")
-except Exception as e:
-    print(f"Error saving datasets: {e}")
+api.upload_folder(
+    folder_path="train.csv",
+    repo_id="praneeth232/test",
+    repo_type="dataset",
+)
+
+api.upload_folder(
+    folder_path="test.csv",
+    repo_id="praneeth232/test",
+    repo_type="dataset",
+)
