@@ -1,8 +1,17 @@
 import pandas as pd
+import joblib
+import mlflow
+import mlflow.sklearn
+import numpy as np
+
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from huggingface_hub import HfApi
-import joblib
+from mlflow.models.signature import infer_signature
+from sklearn.metrics import accuracy_score, classification_report
+
 
 api = HfApi()
 
