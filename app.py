@@ -4,9 +4,20 @@ import streamlit as st
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
+import joblib
+import pandas as pd
+from flask import Flask, request, jsonify
+from sklearn.preprocessing import LabelEncoder
+
+
+# Initialize Flask app
+app = Flask("Telecom Customer Churn Predictor")
+
+
 # Replace with your model repo
 repo_id = "praneeth232/test-model"
 filename = "best_churn_model.joblib"
+
 
 # This fetches the file and gives you the local path
 model_path = hf_hub_download(repo_id=repo_id, filename=filename)
@@ -14,48 +25,61 @@ model_path = hf_hub_download(repo_id=repo_id, filename=filename)
 # Load the model
 model = joblib.load(model_path)
 
-# Streamlit UI for Customer Churn Prediction
-st.title("Telecom Customer Churn Prediction App")
-st.write("This tool predicts customer churn risk based on their details. Enter the required information below.")
-tenure = st.number_input("Tenure (Months with the company)", min_value=0, value=12)
-Contract = st.selectbox("Type of Contract", ["Month-to-month", "One year", "Two year"])
-PaperlessBilling = st.selectbox("PaperlessBilling", ["Yes", "No"])
-PaymentMethod = st.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer", "Credit card"])
-MonthlyCharges = st.number_input("Monthly Charges", min_value=0.0, value=50.0)
-TotalCharges = st.number_input("Total Charges", min_value=0.0, value=600.0)
-InternetService = st.selectbox("Type of Internet Service", ["DSL", "Fiber optic", "No"])
-TechSupport = st.selectbox("TechSupport", ["No", "No internet service", "Yes"])
-OnlineSecurity = st.selectbox("OnlineSecurity", ["No", "No internet service", "Yes"])
-SeniorCitizen = st.selectbox("SeniorCitizen", ["Yes", "No"])
-    
+# Define categorical columns to encode
+categorical_cols = [
+    'Contract', 'PaperlessBilling', 'PaymentMethod',
+    'InternetService', 'TechSupport', 'OnlineSecurity'
+]
 
-# Convert categorical inputs to match model training
-input_data = pd.DataFrame([{
-    'tenure': tenure,
-    'Contract': Contract,
-    'PaperlessBilling': PaperlessBilling,
-    'PaymentMethod': PaymentMethod,
-    'MonthlyCharges': MonthlyCharges,
-    'TotalCharges': TotalCharges,
-    'InternetService': InternetService,
-    'TechSupport': TechSupport,
-    'OnlineSecurity': OnlineSecurity,
-    'SeniorCitizen': 1 if SeniorCitizen == "Yes" else 0
-}])
+# Utility function to encode input using fresh LabelEncoders
+def encode_input(input_df):
+    for col in categorical_cols:
+        le = LabelEncoder()
+        input_df[col] = le.fit_transform(input_df[col])
+    return input_df
 
-# Apply Label Encoding
-categorical_cols = ['Contract', 'PaperlessBilling', 'PaymentMethod', 'InternetService', 'TechSupport', 'OnlineSecurity']
+@app.get('/')
+def home():
+    return "Welcome to the Telecom Customer Churn Prediction API!"
 
-for col in categorical_cols:
-    le = LabelEncoder()
-    input_data[col] = le.fit_transform(input_data[col])
-    
-# Set classification threshold
-classification_threshold = 0.5
+@app.post('/v1/customer')
+def predict_churn():
+    customer_data = request.get_json()
 
-# Predict button
-if st.button("Predict"):
-    prediction_proba = model.predict_proba(input_data)[0, 1]
-    prediction = (prediction_proba >= classification_threshold).astype(int)
-    result = "churn" if prediction == 1 else "not churn"
-    st.write(f"Based on the information provided, the customer is likely to **{result}**.")
+    sample = {
+        'tenure': customer_data['tenure'],
+        'Contract': customer_data['Contract'],
+        'PaperlessBilling': customer_data['PaperlessBilling'],
+        'PaymentMethod': customer_data['PaymentMethod'],
+        'MonthlyCharges': customer_data['MonthlyCharges'],
+        'TotalCharges': customer_data['TotalCharges'],
+        'InternetService': customer_data['InternetService'],
+        'TechSupport': customer_data['TechSupport'],
+        'OnlineSecurity': customer_data['OnlineSecurity'],
+        'SeniorCitizen': 1 if customer_data['SeniorCitizen'] == "Yes" else 0
+    }
+
+    input_df = pd.DataFrame([sample])
+    input_df = encode_input(input_df)
+
+    prediction = model.predict(input_df).tolist()[0]
+    label = "churn" if prediction == 1 else "not churn"
+
+    return jsonify({'Churn expected?': label})
+
+@app.post('/v1/customerbatch')
+def predict_churn_batch():
+    file = request.files['file']
+    input_df = pd.read_csv(file)
+
+    # Convert SeniorCitizen to numeric
+    input_df['SeniorCitizen'] = input_df['SeniorCitizen'].map({'Yes': 1, 'No': 0})
+
+    input_df = encode_input(input_df)
+    predictions = model.predict(input_df).tolist()
+    labels = ['churn' if x == 1 else 'not churn' for x in predictions]
+
+    return jsonify({'predictions': labels})
+
+if __name__ == '__main__':
+    app.run(debug=True)
