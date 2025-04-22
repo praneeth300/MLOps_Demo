@@ -2,7 +2,7 @@ from huggingface_hub import hf_hub_download
 import joblib
 import streamlit as st
 import pandas as pd
-import joblib
+from sklearn.preprocessing import LabelEncoder
 
 # Replace with your model repo
 repo_id = "praneeth232/test-model"
@@ -27,8 +27,7 @@ InternetService = st.selectbox("Type of Internet Service", ["DSL", "Fiber optic"
 TechSupport = st.selectbox("TechSupport", ["No", "No internet service", "Yes"])
 OnlineSecurity = st.selectbox("OnlineSecurity", ["No", "No internet service", "Yes"])
 SeniorCitizen = st.selectbox("SeniorCitizen", ["Yes", "No"])
-
-
+    
 
 # Convert categorical inputs to match model training
 input_data = pd.DataFrame([{
@@ -44,11 +43,16 @@ input_data = pd.DataFrame([{
     'SeniorCitizen': 1 if SeniorCitizen == "Yes" else 0
 }])
 
+# Apply Label Encoding
+categorical_cols = ['Contract', 'PaperlessBilling', 'PaymentMethod', 'InternetService', 'TechSupport', 'OnlineSecurity']
 
+for col in categorical_cols:
+    le = LabelEncoder()
+    input_data[col] = le.fit_transform(input_data[col])
+    
 # Set classification threshold
 classification_threshold = 0.5
 
-# Predict button
 # Predict button
 if st.button("Predict"):
     prediction_proba = model.predict_proba(input_data)[0, 1]
