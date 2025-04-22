@@ -1,12 +1,18 @@
+from huggingface_hub import hf_hub_download
+import joblib
 import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the trained model
-def load_model():
-    return joblib.load("best_churn_model.joblib")
+# Replace with your model repo
+repo_id = "praneeth232/test-model"
+filename = "best_churn_model.joblib"
 
-model = load_model()
+# This fetches the file and gives you the local path
+model_path = hf_hub_download(repo_id=repo_id, filename=filename)
+
+# Load the model
+model = joblib.load(model_path)
 
 # Streamlit UI for Customer Churn Prediction
 st.title("Telecom Customer Churn Prediction App")
