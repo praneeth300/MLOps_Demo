@@ -55,4 +55,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://praneeth232:$HF_TOKEN@huggingface.co/spaces/praneeth232/MLOpsDemo main
+        run: git push --force https://praneeth232:$HF_TOKEN@huggingface.co/spaces/praneeth232/stremdemo main
