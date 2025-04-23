@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 app = Flask("Telecom Customer Churn Predictor")
 
 
-# Replace with your model repoa
+# Replace with your model repo
 repo_id = "praneeth232/test-model"
 filename = "best_churn_model.joblib"
 
