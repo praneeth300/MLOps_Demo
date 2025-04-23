@@ -1,16 +1,11 @@
 import pandas as pd
 import joblib
-import mlflow
-import mlflow.sklearn
 import numpy as np
-
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from huggingface_hub import HfApi
-from mlflow.models.signature import infer_signature
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import GridSearchCV
 
 
 api = HfApi()
@@ -29,58 +24,36 @@ X_train = train_df.drop(columns=[target_col])
 y_test = test_df[target_col]
 X_test = test_df.drop(columns=[target_col])
 
-# Start MLflow experiment
-mlflow.set_experiment("churn_model_experiment")
-
-# Try different models
-models = {
-    "DecisionTree": DecisionTreeClassifier(max_depth=5, criterion='gini'),
-    "RandomForest": RandomForestClassifier(n_estimators=100, max_depth=5),
-    "LogisticRegression": LogisticRegression(max_iter=1000)
+# Define model and hyperparameter grid
+rf = RandomForestClassifier(random_state=42)
+param_grid = {
+    'n_estimators': [50, 100],
+    'max_depth': [5, 10],
+    'min_samples_split': [2, 5]
 }
 
-best_model = None
-best_accuracy = 0.0
-best_model_name = ""
-for model_name, model in models.items():
-    with mlflow.start_run(run_name=model_name):
-        model.fit(X_train, y_train)
+# Perform Grid Search
+grid_search = GridSearchCV(rf, param_grid, cv=3, scoring='accuracy')
+grid_search.fit(X_train, y_train)
 
-        y_pred_train = model.predict(X_train)
-        y_pred_test = model.predict(X_test)
+# Best model
+best_model = grid_search.best_estimator_
 
-        train_acc = accuracy_score(y_train, y_pred_train)
-        test_acc = accuracy_score(y_test, y_pred_test)
+# Evaluate
+y_pred_train = best_model.predict(X_train)
+y_pred_test = best_model.predict(X_test)
 
-        print(f"\nModel: {model_name}")
-        print(f"Train Accuracy: {train_acc:.2f}")
-        print(f"Test Accuracy: {test_acc:.2f}")
-        print("\nTrain Classification Report:")
-        print(classification_report(y_train, y_pred_train))
-        print("Test Classification Report:")
-        print(classification_report(y_test, y_pred_test))
+print(f"Best Parameters: {grid_search.best_params_}")
+print(f"\nTrain Accuracy: {accuracy_score(y_train, y_pred_train):.2f}")
+print(f"Test Accuracy: {accuracy_score(y_test, y_pred_test):.2f}")
 
-        mlflow.log_param("model_name", model_name)
-        mlflow.log_metric("train_accuracy", train_acc)
-        mlflow.log_metric("test_accuracy", test_acc)
+print("\nTrain Classification Report:")
+print(classification_report(y_train, y_pred_train))
+print("Test Classification Report:")
+print(classification_report(y_test, y_pred_test))
 
-        input_example = X_test.iloc[:1]
-        signature = infer_signature(X_test, y_pred_test)
-
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            input_example=input_example,
-            signature=signature
-        )
-
-        if test_acc > best_accuracy:
-            best_model = model
-            best_accuracy = test_acc
-            best_model_name = model_name
-            joblib.dump(best_model, "best_churn_model.joblib")
-
-print(f"\nBest model: {best_model_name} with Test Accuracy: {best_accuracy:.2f}")
+# Save best model
+joblib.dump(best_model, "best_churn_model.joblib")
 
 
 api.upload_file(
