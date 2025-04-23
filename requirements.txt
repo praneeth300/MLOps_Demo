@@ -5,3 +5,4 @@ scikit-learn
 mlflow
 flask
 uvicorn[standard]
+gunicorn
