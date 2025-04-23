@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 from sklearn.preprocessing import LabelEncoder
 
 
-# Initialize Flask app
+# Initialize Flask apps
 app = Flask("Telecom Customer Churn Predictor")
 
 
