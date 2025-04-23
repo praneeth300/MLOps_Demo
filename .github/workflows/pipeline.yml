@@ -1,10 +1,8 @@
 name: MLOps pipeline
+
 on:
   push:
     branches: [main]
-
-  # to run this workflow manually from the Actions tab
-on:
   workflow_dispatch:
 
 jobs:
