@@ -1,4 +1,5 @@
 huggingface_hub
+xgboost
 datasets
 pandas
 scikit-learn
