@@ -1,19 +1,14 @@
-from huggingface_hub import hf_hub_download
 import joblib
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from flask import Flask, request, jsonify
-from sklearn.preprocessing import LabelEncoder
-
+from huggingface_hub import hf_hub_download
 
 # Initialize Flask apps
-app = Flask("Telecom Customer Churn Predictor")
-
+app = Flask("Customer Churn Predictor")
 
 # Replace with your model repo
 repo_id = "praneeth232/test-model"
 filename = "best_churn_model.joblib"
-
 
 # This fetches the file and gives you the local path
 model_path = hf_hub_download(repo_id=repo_id, filename=filename)
@@ -21,61 +16,63 @@ model_path = hf_hub_download(repo_id=repo_id, filename=filename)
 # Load the model
 model = joblib.load(model_path)
 
-# Define categorical columns to encode
-categorical_cols = [
-    'Contract', 'PaperlessBilling', 'PaymentMethod',
-    'InternetService', 'TechSupport', 'OnlineSecurity'
-]
-
-# Utility function to encode input using fresh LabelEncoders
-def encode_input(input_df):
-    for col in categorical_cols:
-        le = LabelEncoder()
-        input_df[col] = le.fit_transform(input_df[col])
-    return input_df
-
+# Define a route for the home page
 @app.get('/')
 def home():
-    return "Welcome to the Telecom Customer Churn Prediction API!"
+    return "Welcome to the Customer Churn Prediction API!"
 
+# Define an endpoint to predict churn for a single customer
 @app.post('/v1/customer')
 def predict_churn():
+    # Get JSON data from the request
     customer_data = request.get_json()
 
+    # Extract relevant customer features from the input data
     sample = {
-        'tenure': customer_data['tenure'],
-        'Contract': customer_data['Contract'],
-        'PaperlessBilling': customer_data['PaperlessBilling'],
-        'PaymentMethod': customer_data['PaymentMethod'],
-        'MonthlyCharges': customer_data['MonthlyCharges'],
-        'TotalCharges': customer_data['TotalCharges'],
-        'InternetService': customer_data['InternetService'],
-        'TechSupport': customer_data['TechSupport'],
-        'OnlineSecurity': customer_data['OnlineSecurity'],
-        'SeniorCitizen': 1 if customer_data['SeniorCitizen'] == "Yes" else 0
+        'CreditScore': customer_data['CreditScore'],
+        'Geography': customer_data['Geography'],
+        'Age': customer_data['Age'],
+        'Tenure': customer_data['Tenure'],
+        'Balance': customer_data['Balance'],
+        'NumOfProducts': customer_data['NumOfProducts'],
+        'HasCrCard': customer_data['HasCrCard'],
+        'IsActiveMember': customer_data['IsActiveMember'],
+        'EstimatedSalary': customer_data['EstimatedSalary']
     }
 
-    input_df = pd.DataFrame([sample])
-    input_df = encode_input(input_df)
+    # Convert the extracted data into a DataFrame
+    input_data = pd.DataFrame([sample])
 
-    prediction = model.predict(input_df).tolist()[0]
-    label = "churn" if prediction == 1 else "not churn"
+    # Make a churn prediction using the trained model
+    prediction = model.predict(input_data).tolist()[0]
 
-    return jsonify({'Churn expected?': label})
+    # Map prediction result to a human-readable label
+    prediction_label = "churn" if prediction == 1 else "not churn"
 
+    # Return the prediction as a JSON response
+    return jsonify({'Churn expected?': prediction_label})
+
+# Define an endpoint to predict churn for a batch of customers
 @app.post('/v1/customerbatch')
 def predict_churn_batch():
+    # Get the uploaded CSV file from the request
     file = request.files['file']
-    input_df = pd.read_csv(file)
 
-    # Convert SeniorCitizen to numeric
-    input_df['SeniorCitizen'] = input_df['SeniorCitizen'].map({'Yes': 1, 'No': 0})
+    # Read the file into a DataFrame
+    input_data = pd.read_csv(file)
 
-    input_df = encode_input(input_df)
-    predictions = model.predict(input_df).tolist()
-    labels = ['churn' if x == 1 else 'not churn' for x in predictions]
+    # Make predictions for the batch data and convert raw predictions into a readable format
+    predictions = [
+        'Churn' if x == 1
+        else "Not Churn"
+        for x in model.predict(input_data.drop("CustomerId",axis=1)).tolist()
+    ]
 
-    return jsonify({'predictions': labels})
+    cust_id_list = input_data.CustomerId.values.tolist()
+    output_dict = dict(zip(cust_id_list, predictions))
 
+    return output_dict
+
+# Run the Flask app in debug mode
 if __name__ == '__main__':
     app.run(debug=True)
