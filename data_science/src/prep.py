@@ -11,7 +11,7 @@ from huggingface_hub import login, HfApi
 # Define constants for the dataset and output paths
 api = HfApi(token=os.getenv("HF_TOKEN"))
 DATASET_PATH = "hf://datasets/praneeth232/test/bank_customer_churn.csv"
-bank = pd.read_csv(DATASET_PATH)
+bank_dataset = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
 
 # Define the target variable for the classification task
@@ -35,10 +35,10 @@ categorical_features = [
 ]
 
 # Define predictor matrix (X) using selected numeric and categorical features
-X = dataset[numeric_features + categorical_features]
+X = bank_dataset[numeric_features + categorical_features]
 
 # Define target variable
-y = dataset[target]
+y = bank_dataset[target]
 
 
 # Split dataset into train and test
