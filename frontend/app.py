@@ -32,13 +32,10 @@ customer_data = {
 }
 
 if st.button("Predict", type='primary'):
-    response = requests.post("https://------------space API url------------/v1/customer", json=customer_data)
-    if response.status_code == 200:
-        result = response.json()
-        churn_prediction = result["Churn expected?"]  # Extract only the value
-        st.write(f"Based on the information provided, the customer with ID {CustomerID} is likely to {churn_prediction}.")
-    else:
-        st.error("Error in API request")
+    response = requests.post("https://praneeth232-backend.hf.space/v1/customer", json=customer_data)
+    result = response.json()
+    churn_prediction = result["Churn expected?"]  # Extract only the value
+    st.write(f"Based on the information provided, the customer with ID {CustomerID} is likely to {churn_prediction}.")
 
 # Batch Prediction
 st.subheader("Batch Prediction")
@@ -46,10 +43,7 @@ st.subheader("Batch Prediction")
 file = st.file_uploader("Upload CSV file", type=["csv"])
 if file is not None:
     if st.button("Predict for Batch", type='primary'):
-        response = requests.post("https://------------space API url------------/v1/customerbatch", files={"file": file})
-        if response.status_code == 200:
-            result = response.json()
-            st.header("Batch Prediction Results")
-            st.write(result)
-        else:
-            st.error("Error in API request")
+        response = requests.post("https://praneeth232-backend.hf.space/v1/customerbatch", files={"file": file})
+        result = response.json()
+        st.header("Batch Prediction Results")
+        st.write(result)
