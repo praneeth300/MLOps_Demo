@@ -6,3 +6,4 @@ mlflow
 flask
 uvicorn[standard]
 gunicorn
+xgboost
