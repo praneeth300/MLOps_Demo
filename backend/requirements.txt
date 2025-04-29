@@ -1,1 +1,8 @@
-s
+huggingface_hub
+datasets
+pandas
+scikit-learn
+mlflow
+flask
+uvicorn[standard]
+gunicorn
