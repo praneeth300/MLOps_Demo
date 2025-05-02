@@ -60,7 +60,7 @@ xgb_model = xgb.XGBClassifier(scale_pos_weight=class_weight, random_state=42)
 
 # Define hyperparameter grid
 param_grid = {
-    'xgbclassifier__n_estimators': [50, 100, 150, 200],    # number of tree to build
+    'xgbclassifier__n_estimators': [50, 75, 100, 125, 150],    # number of tree to build
     'xgbclassifier__max_depth': [2, 3, 4],    # maximum depth of each tree
     'xgbclassifier__colsample_bytree': [0.4, 0.5, 0.6],    # percentage of attributes to be considered (randomly) for each tree
     'xgbclassifier__colsample_bylevel': [0.4, 0.5, 0.6],    # percentage of attributes to be considered (randomly) for each level of a tree
