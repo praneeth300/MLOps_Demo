@@ -16,10 +16,10 @@ from huggingface_hub import login, HfApi
 
 api = HfApi()
 
-Xtrain_path = "hf://datasets/praneeth232/test/Xtrain.csv"
-Xtest_path = "hf://datasets/praneeth232/test/Xtest.csv"
-ytrain_path = "hf://datasets/praneeth232/test/ytrain.csv"
-ytest_path = "hf://datasets/praneeth232/test/ytest.csv"
+Xtrain_path = "hf://datasets/praneeth232/bank-customer-churn/Xtrain.csv"
+Xtest_path = "hf://datasets/praneeth232/bank-customer-churn/Xtest.csv"
+ytrain_path = "hf://datasets/praneeth232/bank-customer-churn/ytrain.csv"
+ytest_path = "hf://datasets/praneeth232/bank-customer-churn/ytest.csv"
 
 Xtrain = pd.read_csv(Xtrain_path)
 Xtest = pd.read_csv(Xtest_path)
@@ -106,6 +106,6 @@ joblib.dump(best_model, "best_churn_model.joblib")
 api.upload_file(
     path_or_fileobj="best_churn_model.joblib",
     path_in_repo="best_churn_model.joblib",
-    repo_id="praneeth232/test-model",
+    repo_id="praneeth232/churn-model",
     repo_type="model",
 )
