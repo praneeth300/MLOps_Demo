@@ -7,7 +7,7 @@ from huggingface_hub import hf_hub_download
 app = Flask("Customer Churn Predictor")
 
 # Replace with your model repo
-repo_id = "praneeth232/test-model"
+repo_id = "praneeth232/churn-model"
 filename = "best_churn_model.joblib"
 
 # This fetches the file and gives you the local path
